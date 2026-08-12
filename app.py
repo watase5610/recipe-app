@@ -29,11 +29,10 @@ if st.button("レシピを提案してもらう！"):
         st.warning("食材を1つ以上選んでください。")
     else:
         try:
-            # APIキー前後の不要な空白を自動除去
-            clean_api_key = api_key.strip()
-            client = genai.Client(api_key=clean_api_key)
+            # 新しい標準SDKの設定
+            client = genai.Client(api_key=api_key.strip())
             
-            # ジャンル指定テキストの作成
+            # ジャンル指定テキスト
             genre_text = f"【希望ジャンル】: {genre}\n" if genre != "指定なし" else ""
             
             prompt = f"""
@@ -53,38 +52,11 @@ if st.button("レシピを提案してもらう！"):
             """
 
             with st.spinner("AIがレシピを考えています..."):
-                res_text = None
-
-                # 1. 最新の Interactions API を試行
-                if hasattr(client, "interactions"):
-                    try:
-                        response = client.interactions.create(
-                            model="gemini-2.5-flash",
-                            input=prompt,
-                        )
-                        res_text = getattr(response, "text", None) or getattr(response, "output_text", None)
-                    except Exception:
-                        pass
-
-                # 2. 従来型の API をフォールバック試行
-                if not res_text:
-                    for model_name in ["gemini-2.5-flash", "gemini-2.0-flash"]:
-                        try:
-                            response = client.models.generate_content(
-                                model=model_name,
-                                contents=prompt,
-                            )
-                            res_text = response.text
-                            if res_text:
-                                break
-                        except Exception:
-                            continue
-
-                if res_text:
-                    st.success("おすすめレシピができました！")
-                    st.markdown(res_text)
-                else:
-                    st.error("レシピの生成に失敗しました。APIキーをご確認ください。")
-
+                response = client.models.generate_content(
+                    model="gemini-2.5-flash",
+                    contents=prompt,
+                )
+                st.success("おすすめレシピができました！")
+                st.markdown(response.text)
         except Exception as e:
             st.error(f"エラーが発生しました: {e}")
