@@ -29,11 +29,11 @@ if st.button("レシピを提案してもらう！"):
         st.warning("食材を1つ以上選んでください。")
     else:
         try:
-            # スマホのコピペで混入する前後の余計な空白・改行を自動除去
+            # APIキー前後の不要な空白を自動削除
             clean_api_key = api_key.strip()
             client = genai.Client(api_key=clean_api_key)
             
-            # ジャンル指定のテキストを作成
+            # ジャンル指定テキストの作成
             genre_text = f"【希望ジャンル】: {genre}\n" if genre != "指定なし" else ""
             
             prompt = f"""
@@ -54,7 +54,7 @@ if st.button("レシピを提案してもらう！"):
 
             with st.spinner("AIがレシピを考えています..."):
                 response = client.models.generate_content(
-                    model="gemini-1.5-flash",
+                    model="gemini-2.0-flash",
                     contents=prompt,
                 )
                 st.success("おすすめレシピができました！")
