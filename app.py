@@ -1,5 +1,6 @@
+
 import streamlit as st
-import google.generativeai as genai
+from google import genai
 
 st.title("🍳 冷蔵庫のおかず提案アプリ")
 st.write("今ある食材を選ぶだけで、AIが今日の夕飯おかずを提案します！")
@@ -29,8 +30,9 @@ if st.button("レシピを提案してもらう！"):
         st.warning("食材を1つ以上選んでください。")
     else:
         try:
-            genai.configure(api_key=api_key)
-            model = genai.GenerativeModel("gemini-1.5-flash")
+            # スマホのコピペで混入する前後の余計な空白・改行を自動除去
+            clean_api_key = api_key.strip()
+            client = genai.Client(api_key=clean_api_key)
             
             # ジャンル指定のテキストを作成
             genre_text = f"【希望ジャンル】: {genre}\n" if genre != "指定なし" else ""
@@ -52,7 +54,10 @@ if st.button("レシピを提案してもらう！"):
             """
 
             with st.spinner("AIがレシピを考えています..."):
-                response = model.generate_content(prompt)
+                response = client.models.generate_content(
+                    model="gemini-1.5-flash",
+                    contents=prompt,
+                )
                 st.success("おすすめレシピができました！")
                 st.markdown(response.text)
         except Exception as e:
