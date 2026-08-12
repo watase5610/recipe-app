@@ -13,7 +13,7 @@ ingredients = st.multiselect(
     ["牛肉", "豚肉", "鶏肉", "ひき肉", "鮭", "サバ", "卵", "豆腐", "キャベツ", "白菜", "玉ねぎ", "じゃがいも", "人参", "大根", "もやし", "茄子", "ピーマン", "キノコ類"]
 )
 
-# 料理ジャンル選択（新機能！）
+# 料理ジャンル選択
 genre = st.selectbox(
     "料理のジャンルを選んでください",
     ["指定なし", "和食", "洋食", "中華", "エスニック", "イタリアン"]
@@ -52,7 +52,7 @@ if st.button("レシピを提案してもらう！"):
 
             with st.spinner("AIがレシピを考えています..."):
                 response = client.models.generate_content(
-                    model="gemini-2.5-flash",
+                    model="gemini-1.5-flash",
                     contents=prompt,
                 )
                 st.success("おすすめレシピができました！")
