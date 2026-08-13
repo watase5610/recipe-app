@@ -29,10 +29,9 @@ if st.button("レシピを提案してもらう！"):
         st.warning("食材を1つ以上選んでください。")
     else:
         try:
-            # 新しい標準SDKの設定
-            client = genai.Client(api_key=api_key.strip())
+            clean_api_key = api_key.strip()
+            client = genai.Client(api_key=clean_api_key)
             
-            # ジャンル指定テキスト
             genre_text = f"【希望ジャンル】: {genre}\n" if genre != "指定なし" else ""
             
             prompt = f"""
@@ -52,11 +51,27 @@ if st.button("レシピを提案してもらう！"):
             """
 
             with st.spinner("AIがレシピを考えています..."):
-                response = client.models.generate_content(
-                    model="gemini-2.5-flash",
-                    contents=prompt,
-                )
-                st.success("おすすめレシピができました！")
-                st.markdown(response.text)
+                # 環境に応じて利用可能なモデルを自動順試行
+                models_to_try = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
+                response = None
+                last_error = None
+
+                for model_name in models_to_try:
+                    try:
+                        response = client.models.generate_content(
+                            model=model_name,
+                            contents=prompt,
+                        )
+                        if response and response.text:
+                            break
+                    except Exception as e:
+                        last_error = e
+
+                if response and response.text:
+                    st.success("おすすめレシピができました！")
+                    st.markdown(response.text)
+                else:
+                    st.error(f"エラーが発生しました: {last_error}")
+
         except Exception as e:
             st.error(f"エラーが発生しました: {e}")
